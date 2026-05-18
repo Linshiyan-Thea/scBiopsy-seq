@@ -3,12 +3,9 @@ library(ggplot2)
 library(ggrepel)
 library(umap)
 
-# Hardcoded file paths (modify directly here if needed)
 count_file <- "SK0146_Matrix_FPKM.xlsx"
 group_file <- "class_info_DESeq2.xlsx"
 output_dir <- "UMAP_FPKM_results"
-min_samples <- 24
-umap_neighbors <- 20
 
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
