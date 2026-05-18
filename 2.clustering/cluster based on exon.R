@@ -3,7 +3,7 @@ library(ggplot2)
 library(ggrepel)
 library(umap)
 
-count_file <- "SK0146_Matrix_FPKM.xlsx"
+count_file <- "Matrix.xlsx"
 group_file <- "class_info_DESeq2.xlsx"
 output_dir <- "UMAP_FPKM_results"
 
