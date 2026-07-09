@@ -5,13 +5,13 @@ import os
 import re
 import argparse
 
-parser = argparse.ArgumentParser(description='外显子比对率+内含子比对率(对目录下所有Aligned.out.sam文件操作)：\
-                                              python ExonIntron_RNA_v2.1.py \
-                                              -e exon.bed \
-                                              -g gene.bed ')
+parser = argparse.ArgumentParser(description='Calculate exon and intron mapping rates for all Aligned.out.sam files in the current directory. \
+                                              python ExonIntron_RNA_v2.2.py \
+                                              -e path/to/exon.bed \
+                                              -g path/to/gene.bed')
 
-parser.add_argument('-e', '--exon', type=str, default='/home/disk/linl/reference/GRCh38/exon.bed', help='exon.bed')
-parser.add_argument('-g', '--gene', type=str, default='/home/disk/linl/reference/GRCh38/gene.bed', help='gene.bed')
+parser.add_argument('-e', '--exon', type=str, required=True, help='path to the exon BED file')
+parser.add_argument('-g', '--gene', type=str, required=True, help='path to the gene BED file')
 
 args = parser.parse_args()
 
