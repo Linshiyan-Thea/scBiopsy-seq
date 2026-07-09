@@ -1,3 +1,19 @@
+# ==============================================================================
+# Clustering Based on Within-Cell Expression Changes Across Time Points
+# Description: Compute log2 fold changes (FC) between paired time points
+#              (0h, 1h, 4h), then perform t-SNE and k-means clustering.
+# Input:  - DGE_count_clean.txt: a gene x sample count matrix (tab-separated).
+#           Column names follow the format: CellName.TimePoint
+#           e.g., C1.0, C1.1, C1.4  (time points: 0 = 0h, 1 = 1h, 4 = 4h)
+#           Each cell must have all three time points present.
+#           Values are raw counts; +1 is added internally to avoid division by zero.
+# Output: t-SNE plots, filtered FC matrix, and DE gene lists.
+# ==============================================================================
+# Environment: R 4.4.3
+# Packages: Rtsne 0.17, mclust 6.1.2, ggplot2 4.0.2, ggrepel 0.9.6,
+#           cowplot 1.2.0, pheatmap 1.0.13, ggplotify 0.1.3
+# ==============================================================================
+
 library(Rtsne)
 library(mclust)
 library(ggplot2)
@@ -6,8 +22,13 @@ library(cowplot)
 library(pheatmap)
 library(ggplotify)
 
-mode <- "count_clean"
-data <- read.table(paste0("DGE_", mode, ".txt"))
+# -------------------------- User settings ------------------------------------
+seed <- 123  # random seed for reproducibility (t-SNE, k-means)
+# -----------------------------------------------------------------------------
+
+# Input file (adjust the file name and path to your expression matrix)
+data_file <- "path/to/your/DGE_count_clean.txt"
+data <- read.table(data_file)
 data <- data + 1
 sample <- colnames(data)
 cell <- do.call(rbind, strsplit(sample, split="\\."))[,1]
@@ -55,10 +76,12 @@ tsne_plot <- function(FC, time='0-1-4', perplexity=10){
   
   pca <- prcomp(t(FC), scale. = FALSE)
   rd1 <- pca$x[,1:2]
-  rd2 <- Rtsne(t(FC), perplexity = perplexity)$Y
+  set.seed(seed)
+  rd2 <- Rtsne(t(FC), perplexity = perplexity, seed = seed)$Y
   rd2 <- data.frame(rd2)
   colnames(rd2) <- c('tSNE1', 'tSNE2')
   rd2$Sample <- colnames(FC)
+  set.seed(seed)
   cl2 <- kmeans(rd1, centers = 2)$cluster
   rd2$k2 <- as.character(cl2)
   rd2$time <- time
