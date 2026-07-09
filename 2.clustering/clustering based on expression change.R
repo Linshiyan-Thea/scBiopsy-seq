@@ -26,7 +26,6 @@ n_neighbors    <- 6     # UMAP n_neighbors (adjust based on sample size)
 # Input file (adjust the file name and path to your expression matrix)
 data_file <- "path/to/your/DGE_count_clean.txt"
 mode        <- "count_clean"  # label used in output file names
-output_dir  <- "path/to/your/output"
 data <- read.table(data_file)
 data <- data + 1
 sample <- colnames(data)
