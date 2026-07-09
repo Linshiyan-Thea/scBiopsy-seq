@@ -6,6 +6,9 @@
 #         - A sample metadata file with columns: sample, group.
 # Output: Scatter plots (PDF) and correlation coefficients (txt).
 # ==============================================================================
+# Environment: R 4.4.3
+# Packages: ggplot2 4.0.2, readxl 1.4.5
+# ==============================================================================
 
 library(ggplot2)
 library(readxl)
