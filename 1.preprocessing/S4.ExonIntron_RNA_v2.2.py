@@ -10,8 +10,8 @@ parser = argparse.ArgumentParser(description='Calculate exon and intron mapping 
                                               -e path/to/exon.bed \
                                               -g path/to/gene.bed')
 
-parser.add_argument('-e', '--exon', type=str, required=True, help='path to the exon BED file')
-parser.add_argument('-g', '--gene', type=str, required=True, help='path to the gene BED file')
+parser.add_argument('-e', '--exon', type=str, required=True, help='path to the exon BED file (derived from GRCh38.105 for human, GRCm38.102 for mouse)')
+parser.add_argument('-g', '--gene', type=str, required=True, help='path to the gene BED file (derived from GRCh38.105 for human, GRCm38.102 for mouse)')
 
 args = parser.parse_args()
 
