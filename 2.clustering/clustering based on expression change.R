@@ -26,6 +26,9 @@ n_neighbors    <- 6     # UMAP n_neighbors (adjust based on sample size)
 # Input file (adjust the file name and path to your expression matrix)
 data_file <- "path/to/your/DGE_count_clean.txt"
 mode        <- "count_clean"  # label used in output file names
+output_dir  <- "path/to/your/output"
+if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
+
 data <- read.table(data_file)
 data <- data + 1
 sample <- colnames(data)
@@ -97,7 +100,7 @@ umap_plot <- function(FC, time = '0-1-4', n_neigh = n_neighbors) {
            geom_text_repel(aes(label = Sample), size = 2, box.padding = 0.1, min.segment.length = 0.15, show.legend = FALSE) +
            theme_classic()
   
-  pdf(paste0('logFC.', mode, '.', time, '.pdf'), width = 14, height = 3)
+  pdf(file.path(output_dir, paste0('logFC.', mode, '.', time, '.pdf')), width = 14, height = 3)
   print(plot_grid(p, ps, pk2, ncol = 3))
   dev.off()
   
@@ -112,7 +115,7 @@ FC <- FC[which(rowSums(FC) > 0), ]
 FC_ <- FC
 FC_[FC_ != 0] <- 1
 FC <- FC[which(rowSums(FC_) > dim(FC_)[2] * 0.9), ]
-write.table(FC, paste0('logFC.', mode, '.0-1-4.txt'), sep = '\t')
+write.table(FC, file.path(output_dir, paste0('logFC.', mode, '.0-1-4.txt')), sep = '\t')
 
 data <- FC
 anno <- data.frame(cell = rd2$Sample, clus = paste0('clu', rd2$k2))
@@ -129,7 +132,9 @@ de_info <- data.frame(row.names = rownames(data), pvalue = pv)
 de_info$is_DE <- de_info$pvalue < 0.05
 de_info <- de_info[order(de_info$pvalue), ]
 de <- rownames(de_info)[which(de_info$is_DE == TRUE)]
-write.table(de_info, paste0('pvalue.', mode, '.0-1-4.txt'), sep = '\t')
-write(de, paste0('DE.', mode, '.0-1-4.txt'), sep = '\t')
-write.table(data[de,], paste0('logFC_DE.', mode, '.0-1-4.txt'), sep = '\t')
-write.table(de_info[de,], paste0('pvalue_DE.', mode, '.0-1-4.txt'), sep = '\t')
+write.table(de_info, file.path(output_dir, paste0('pvalue.', mode, '.0-1-4.txt')), sep = '\t')
+write(de, file.path(output_dir, paste0('DE.', mode, '.0-1-4.txt')), sep = '\t')
+write.table(data[de,], file.path(output_dir, paste0('logFC_DE.', mode, '.0-1-4.txt')), sep = '\t')
+write.table(de_info[de,], file.path(output_dir, paste0('pvalue_DE.', mode, '.0-1-4.txt')), sep = '\t')
+
+cat("Done. Results in", output_dir, "\n")
