@@ -1,29 +1,26 @@
 # ==============================================================================
 # Clustering Based on Within-Cell Expression Changes Across Time Points
 # Description: Compute log2 fold changes (FC) between paired time points
-#              (0h, 1h, 4h), then perform t-SNE and k-means clustering.
+#              (0h, 1h, 4h), then perform UMAP and k-means clustering.
 # Input:  - DGE_count_clean.txt: a gene x sample count matrix (tab-separated).
 #           Column names follow the format: CellName.TimePoint
 #           e.g., C1.0, C1.1, C1.4  (time points: 0 = 0h, 1 = 1h, 4 = 4h)
 #           Each cell must have all three time points present.
 #           Values are raw counts; +1 is added internally to avoid division by zero.
-# Output: t-SNE plots, filtered FC matrix, and DE gene lists.
+# Output: UMAP plots, filtered FC matrix, and DE gene lists.
 # ==============================================================================
 # Environment: R 4.4.3
-# Packages: Rtsne 0.17, mclust 6.1.2, ggplot2 4.0.2, ggrepel 0.9.6,
-#           cowplot 1.2.0, pheatmap 1.0.13, ggplotify 0.1.3
+# Packages: umap 0.2.10.0, ggplot2 4.0.2, ggrepel 0.9.6, cowplot 1.2.0
 # ==============================================================================
 
-library(Rtsne)
-library(mclust)
+library(umap)
 library(ggplot2)
 library(ggrepel)
 library(cowplot)
-library(pheatmap)
-library(ggplotify)
 
 # -------------------------- User settings ------------------------------------
-seed <- 123  # random seed for reproducibility (t-SNE, k-means)
+seed           <- 123   # random seed for reproducibility (UMAP, k-means)
+n_neighbors    <- 6     # UMAP n_neighbors (adjust based on sample size)
 # -----------------------------------------------------------------------------
 
 # Input file (adjust the file name and path to your expression matrix)
@@ -69,7 +66,7 @@ for (c in cell){
   }
 }
 
-tsne_plot <- function(FC, time='0-1-4', perplexity=10){
+umap_plot <- function(FC, time = '0-1-4', n_neigh = n_neighbors) {
   FC <- data.frame(t(na.omit(t(FC))))
   FC <- FC[which(rowSums(FC) > 0), ]
   FC_ <- FC
@@ -77,23 +74,26 @@ tsne_plot <- function(FC, time='0-1-4', perplexity=10){
   FC <- FC[which(rowSums(FC_) > dim(FC_)[2] * 0.9), ]
   
   pca <- prcomp(t(FC), scale. = FALSE)
-  rd1 <- pca$x[,1:2]
+  rd1 <- pca$x[, 1:min(50, ncol(pca$x))]
+  
   set.seed(seed)
-  rd2 <- Rtsne(t(FC), perplexity = perplexity, seed = seed)$Y
-  rd2 <- data.frame(rd2)
-  colnames(rd2) <- c('tSNE1', 'tSNE2')
+  n_neigh <- min(n_neigh, ncol(FC) - 1)
+  umap_res <- umap(rd1, n_neighbors = n_neigh, n_components = 2, random_state = seed)
+  rd2 <- data.frame(umap_res$layout)
+  colnames(rd2) <- c('UMAP1', 'UMAP2')
   rd2$Sample <- colnames(FC)
+  
   set.seed(seed)
   cl2 <- kmeans(rd1, centers = 2)$cluster
   rd2$k2 <- as.character(cl2)
   rd2$time <- time
   
-  p <- ggplot(rd2, aes(x = tSNE1, y = tSNE2, fill = time)) + geom_point() + theme_classic()
-  ps <- ggplot(rd2, aes(x = tSNE1, y = tSNE2, fill = time)) +
+  p <- ggplot(rd2, aes(x = UMAP1, y = UMAP2, fill = time)) + geom_point() + theme_classic()
+  ps <- ggplot(rd2, aes(x = UMAP1, y = UMAP2, fill = time)) +
           geom_point() +
           geom_text_repel(aes(label = Sample), size = 2, box.padding = 0.1, min.segment.length = 0.15, show.legend = FALSE) +
           theme_classic()
-  pk2 <- ggplot(rd2, aes(x = tSNE1, y = tSNE2, color = k2)) +
+  pk2 <- ggplot(rd2, aes(x = UMAP1, y = UMAP2, color = k2)) +
            geom_point() +
            geom_text_repel(aes(label = Sample), size = 2, box.padding = 0.1, min.segment.length = 0.15, show.legend = FALSE) +
            theme_classic()
@@ -106,7 +106,7 @@ tsne_plot <- function(FC, time='0-1-4', perplexity=10){
 }
 
 FC <- rbind(FC01, FC14)
-rd2 <- tsne_plot(FC, time = '0-1-4', perplexity = 4)
+rd2 <- umap_plot(FC, time = '0-1-4', n_neigh = 6)
 
 FC <- data.frame(t(na.omit(t(FC))))
 FC <- FC[which(rowSums(FC) > 0), ]
