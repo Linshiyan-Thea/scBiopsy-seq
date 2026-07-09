@@ -8,6 +8,11 @@
 # Output: Trajectory plots (UMAP), pseudotime tables, gene–pseudotime
 #         correlation results, and top-10 gene mapping plots.
 # ==============================================================================
+# Environment: R 4.4.3
+# Packages: openxlsx 4.2.8, dplyr 1.1.4, stringr 1.5.2,
+#           SingleCellExperiment 1.28.1, scater 1.34.1, slingshot 2.14.0,
+#           ggplot2 4.0.2, ggrepel 0.9.6, viridis 0.6.5, patchwork 1.3.2
+# ==============================================================================
 
 library(openxlsx)
 library(dplyr)
@@ -21,6 +26,8 @@ library(viridis)
 library(patchwork)
 
 # ======================== User settings ======================================
+seed <- 123  # random seed for reproducibility (UMAP)
+
 # Replace with your own file paths
 count_file <- "path/to/your/count_matrix.xlsx"
 group_file <- "path/to/your/sample_groups.xlsx"
@@ -74,7 +81,7 @@ reducedDim(sce, "PCA") <- pca_res$x
 n_samples   <- ncol(count_data)
 n_neighbors <- min(15, n_samples - 1)
 cat("UMAP n_neighbors =", n_neighbors, "\n")
-sce <- runUMAP(sce, dimred = "PCA", n_neighbors = n_neighbors)
+sce <- runUMAP(sce, dimred = "PCA", n_neighbors = n_neighbors, seed = seed)
 
 # ======================== Slingshot trajectory inference ======================
 colData(sce)$cluster <- as.factor(cell_meta$group)
@@ -162,8 +169,11 @@ expr_top10   <- as.data.frame(t(log_counts_mat[top10_genes, , drop = FALSE]))
 expr_top10$sample <- rownames(expr_top10)
 plot_df <- merge(umap_plot_df, expr_top10, by = "sample")
 
-# Define group colors — adjust names to match your group labels
-group_colors <- c("Initial" = "blue", "Infected" = "red")
+# Define group colors — auto-assign based on unique groups in data
+unique_groups <- unique(cell_meta$group)
+safe_colors <- c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00",
+                 "#FFFF33", "#A65628", "#F781BF")
+group_colors <- setNames(safe_colors[1:length(unique_groups)], unique_groups)
 
 # Multi-page PDF: each page shows one gene (UMAP expression + trend)
 pdf(file.path(output_dir, "top10_genes_mapping_plots.pdf"), width = 12, height = 6)
