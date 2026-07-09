@@ -1,3 +1,16 @@
+# ==============================================================================
+# UMAP Clustering Comparing scBiopsy-seq and scRNA-seq Data (FPKM)
+# Description: Perform PCA + UMAP on a merged FPKM expression matrix from
+#              scBiopsy-seq and scRNA-seq, and visualise sample clustering.
+# Input:  - matrix.xlsx: gene x sample FPKM expression matrix (first column = gene names).
+#         - class_info_DESeq2.xlsx: sample grouping file (columns: sample, group).
+# Output: UMAP coordinates (xlsx) and UMAP plots (PDF).
+# ==============================================================================
+# Environment: R 4.4.3
+# Packages: openxlsx 4.2.8, dplyr 1.1.4, ggplot2 4.0.2, ggrepel 0.9.6,
+#           SingleCellExperiment 1.28.1, scater 1.34.1
+# ==============================================================================
+
 # -------------------------- Load packages --------------------------
 library(openxlsx)
 library(dplyr)
@@ -7,9 +20,12 @@ library(SingleCellExperiment)
 library(scater)
 
 # -------------------------- Files (place in working directory) --------------------------
-count_file <- "matrix.xlsx"
-group_file <- "class_info_DESeq2.xlsx"
-output_dir <- "UMAP_Results"
+# Parameters (adjust based on your dataset)
+seed <- 123  # random seed for reproducibility
+
+count_file <- "path/to/your/expression_matrix.xlsx"
+group_file <- "path/to/your/sample_groups.xlsx"
+output_dir <- "path/to/your/output"
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
 # -------------------------- Read expression matrix (FPKM) --------------------------
@@ -40,7 +56,8 @@ fpkm_data[is.na(fpkm_data)] <- 0
 n_samples <- ncol(fpkm_data)
 cat("Number of samples:", n_samples, "\n")
 
-min_samples <- 27
+# Minimum number of samples a gene must be detected in (adjust based on sample size)
+min_samples <- ncol(fpkm_data) - 2  # e.g., keep genes detected in all but 2 samples
 keep_genes <- rowSums(fpkm_data > 0) >= min_samples
 fpkm_data <- fpkm_data[keep_genes, ]
 cat("Genes retained after filtering:", nrow(fpkm_data), "\n")
@@ -97,7 +114,7 @@ reducedDim(sce, "PCA") <- pca_res$x
 # -------------------------- UMAP --------------------------
 n_neighbors <- min(20, n_samples - 1)
 cat("UMAP using n_neighbors =", n_neighbors, "\n")
-sce <- runUMAP(sce, dimred = "PCA", n_neighbors = n_neighbors)
+sce <- runUMAP(sce, dimred = "PCA", n_neighbors = n_neighbors, seed = seed)
 
 # -------------------------- Extract UMAP coordinates --------------------------
 umap_coords <- reducedDim(sce, "UMAP")
