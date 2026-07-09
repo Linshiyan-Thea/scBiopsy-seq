@@ -152,7 +152,7 @@ Set `gene_set_name` in the script to label the output file.
 source("4.trajectory/Trajectory.R")
 ```
 
-Outputs include pseudotime tables, gene–pseudotime correlations, and top-10 gene UMAP plots.
+Outputs include pseudotime tables, gene–pseudotime correlations.
 
 ### 5. Differential expression
 
