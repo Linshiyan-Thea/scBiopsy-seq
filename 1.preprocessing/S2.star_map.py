@@ -1,79 +1,55 @@
 # ==============================================================================
 # Environment: Python 3.12
-# No external package dependencies (standard library only: os, re, argparse)
-# External tools: samtools 1.19.2
+# No external package dependencies (standard library only: sys, os, re, datetime, argparse)
+# External tools: STAR 2.7.11b
 # ==============================================================================
 
+import sys
 import os
 import re
+import datetime
 import argparse
 
-parser = argparse.ArgumentParser(description='Calculate exon and intron mapping rates for all Aligned.out.sam files in the current directory. \
-                                              python ExonIntron_RNA_v2.2.py \
-                                              -e path/to/exon.bed \
-                                              -g path/to/gene.bed')
+parser = argparse.ArgumentParser(description='STAR alignment for paired-end RNA-seq reads. \
+                                              python S2.star_map_ver0.02.py \
+                                              --star_index path/to/STAR/genome/index \
+                                              --gtf path/to/annotation.gtf \
+                                              Reference: human GRCh38.105 / mouse GRCm38.102')
 
-parser.add_argument('-e', '--exon', type=str, required=True, help='path to the exon BED file (derived from GRCh38.105 for human, GRCm38.102 for mouse)')
-parser.add_argument('-g', '--gene', type=str, required=True, help='path to the gene BED file (derived from GRCh38.105 for human, GRCm38.102 for mouse)')
+parser.add_argument('--star_index', type=str, required=True, help='path to the STAR genome index directory (e.g., GRCh38.105 for human, GRCm38.102 for mouse)')
+parser.add_argument('--gtf', type=str, required=True, help='path to the GTF annotation file (e.g., Homo_sapiens.GRCh38.105.gtf for human, Mus_musculus.GRCm38.102.gtf for mouse)')
+parser.add_argument('-t', '--threads', type=int, default=10, help='number of threads (default: 10)')
 
 args = parser.parse_args()
 
+#define parameters
+source_star_path = args.star_index
+gtf_file_path = args.gtf
+n_threads = args.threads
+now_time = datetime.datetime.now()
+time_str = now_time.strftime('%Y-%m-%d-%H_%M_%S')
+star_out_path = 'star_out_'+time_str
+log_out_path = 'log_final_out'
+os.system('''mkdir -p ./{path1}/{path2}'''.format(path1 = star_out_path,path2 = log_out_path))
+# read files with 1.fq
+#os.popeen() will retrun a list of results of shell commands
+os.system(' ls *_1_repair_1.fq > clean_file_star_temp.txt')
 
-def ExonIntron_RNA(sam, exon, gene):
-    prefix=re.sub('Aligned.out.sam','',sam)
-    os.system("samtools view -@ 15 -bS %s > %s.bam" % (sam, prefix))
-    os.system("samtools sort -@ 15 %s.bam -o %s.sorted.bam" % (prefix, prefix))
-    os.system("samtools depth %s.sorted.bam > %s.bam.depth" % (prefix, prefix))
-    os.system("samtools depth -b %s %s.sorted.bam > %s_exon.bam.depth" % (exon, prefix, prefix))
-    os.system("samtools depth -b %s %s.sorted.bam > %s_gene.bam.depth" % (gene, prefix, prefix))
+raw_file = open ('clean_file_star_temp.txt')
 
-    file_ExonIntron=open(prefix+'_ExonIntron.txt','w')
-    file_ExonIntron.write("Sample name: "+prefix+'\n')
-
-    total_bases = 0
-    file_total = open(prefix+'.bam.depth','r')
-    for line in file_total:
-        l = re.sub('\n','',line)
-        f = int(l.split('\t')[2])
-        total_bases = total_bases + f
-    file_ExonIntron.write("Total mapped bases: "+str(total_bases)+'\n')
-    file_total.close()
- 
-    exon_bases = 0
-    file_exon = open(prefix+'_exon.bam.depth','r')
-    for line in file_exon:
-        l = re.sub('\n','',line)
-        f = int(l.split('\t')[2])
-        exon_bases = exon_bases + f
-    p_exon = exon_bases / float(total_bases)
-    file_ExonIntron.write("Exon bases: "+str(exon_bases)+'\n')
-    file_ExonIntron.write("% of bases mapped to exon: {:.2%}".format(p_exon)+'\n')
-    file_exon.close()
+for f1 in raw_file:
+    f1 = f1.rstrip()
+    f2 = re.sub('_1_repair_1.fq','_2_repair_2.fq',f1)
+    r1 = f1.split('.')[0]
+    r2 = f2.split('.')[0]
+    out_prefix = re.sub('_1_repair_1.fq','',f1)
+    print('now processing: %s and %s'%(r1,r2))
+    os.system('''
+STAR --runThreadN {threads} --genomeDir {starpath} --outFileNamePrefix {prefix} --sjdbGTFfile {gtf} --outSAMunmapped Within --readFilesIn {read1}.fq {read2}.fq;
+mv {prefix}Log.final.out ./{path1}/{path2};
+mv {prefix}Aligned.out.sam {prefix}Log.out {prefix}Log.progress.out {prefix}SJ.out.tab {prefix}_STARgenome ./{path1};
+'''.format(threads=n_threads, starpath=source_star_path, read1=r1, read2=r2, prefix=out_prefix, gtf=gtf_file_path, path1=star_out_path, path2=log_out_path)) 
     
-    gene_bases = 0
-    file_gene = open(prefix+'_gene.bam.depth','r')
-    for line in file_gene:
-        l = re.sub('\n','',line)
-        f = int(l.split('\t')[2])
-        gene_bases = gene_bases + f
-    p_gene = gene_bases / float(total_bases)
-    p_intron = p_gene - p_exon
-    file_ExonIntron.write("Gene bases: "+str(gene_bases)+'\n')
-    file_ExonIntron.write("% of bases mapped to gene: {:.2%}".format(p_gene)+'\n')
-    file_ExonIntron.write("% of bases mapped to intron: {:.2%}".format(p_intron)+'\n')
-    file_gene.close()
-    
-    file_ExonIntron.close()
-    os.system("rm %s.bam %s.bam.depth %s_exon.bam.depth %s_gene.bam.depth" % (prefix, prefix, prefix, prefix))
-    # os.system("rm %s %s.bam %s.bam.depth %s_exon.bam.depth %s_gene.bam.depth" % (sam, prefix, prefix, prefix, prefix))
-    print(sam+' is finished!')
+os.system('''rm clean_file_star_temp.txt''')
 
-exon = args.exon
-gene = args.gene
-os.system("ls *Aligned.out.sam > list_Aligned_out_sam_inex.tmp.txt")
-file_list_sam = open('list_Aligned_out_sam_inex.tmp.txt','r')
-for i in file_list_sam:
-    sam = re.sub('\n','',i)
-    ExonIntron_RNA(sam, exon, gene)
-file_list_sam.close()
-os.system("rm list_Aligned_out_sam_inex.tmp.txt")
+print('star map done!!!')
