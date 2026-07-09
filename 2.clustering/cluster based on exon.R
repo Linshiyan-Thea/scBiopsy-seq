@@ -1,11 +1,30 @@
+# ==============================================================================
+# UMAP Clustering Based on Exon Expression (FPKM)
+# Description: Perform PCA + UMAP dimensionality reduction on an FPKM
+#              expression matrix and visualise sample clustering.
+# Input:  - Matrix.xlsx: gene x sample FPKM expression matrix (first column = gene names).
+#         - class_info_DESeq2.xlsx: sample grouping file (columns: sample, group).
+# Output: UMAP coordinates (xlsx) and UMAP plots (PDF).
+# ==============================================================================
+# Environment: R 4.4.3
+# Packages: openxlsx 4.2.8, ggplot2 4.0.2, ggrepel 0.9.6, umap 0.2.10.0
+# ==============================================================================
+
 library(openxlsx)
 library(ggplot2)
 library(ggrepel)
 library(umap)
 
-count_file <- "Matrix.xlsx"
-group_file <- "class_info_DESeq2.xlsx"
-output_dir <- "UMAP_FPKM_results"
+# -------------------------- User settings ------------------------------------
+count_file <- "path/to/your/expression_matrix.xlsx"
+group_file <- "path/to/your/sample_groups.xlsx"
+output_dir <- "path/to/your/output"
+
+# Parameters (adjust based on your dataset size)
+min_samples    <- 3    # minimum number of samples a gene must be detected in
+umap_neighbors <- 6    # UMAP n_neighbors (recommended: min(15, n_samples - 1))
+seed           <- 123  # random seed for reproducibility
+# -----------------------------------------------------------------------------
 
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
@@ -57,7 +76,8 @@ pca_res <- prcomp(t(expr_log), scale. = TRUE, center = TRUE)
 n_neighbors <- min(umap_neighbors, ncol(fpkm_data) - 1)
 umap_res <- umap(pca_res$x[, 1:min(50, ncol(pca_res$x))],
                  n_neighbors = n_neighbors,
-                 n_components = 2)
+                 n_components = 2,
+                 random_state = seed)
 umap_df <- data.frame(sample = sample_names,
                       group = cell_meta$group,
                       UMAP1 = umap_res$layout[, 1],
