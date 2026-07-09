@@ -94,7 +94,7 @@ Key packages:
 
 ### 1. Preprocessing
 
-Run scripts sequentially in the `1.preprocessing/` directory. Each script accepts command-line arguments; use `--help` for details.
+Run scripts sequentially in the `1.preprocessing/` directory.
 
 ```bash
 # Quality control
