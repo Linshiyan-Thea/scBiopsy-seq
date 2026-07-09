@@ -1,5 +1,7 @@
-#!/usr/bin/env python
-#coding=utf-8
+# ==============================================================================
+# Environment: Python 3.12
+# No external package dependencies (standard library only: os, re, argparse)
+# ==============================================================================
 
 import os
 import re
