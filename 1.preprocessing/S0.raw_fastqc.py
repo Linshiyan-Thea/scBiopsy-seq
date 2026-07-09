@@ -1,3 +1,8 @@
+# ==============================================================================
+# Environment: Python 3.12
+# No external package dependencies (standard library only: os, re)
+# ==============================================================================
+
 import os
 import re
 
