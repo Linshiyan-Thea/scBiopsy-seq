@@ -6,9 +6,9 @@ import re
 import openpyxl
 import argparse
 
-parser = argparse.ArgumentParser(description='整合各样本的ExonIntron信息（对目录下所有*_ExonIntron.txt操作）: \
+parser = argparse.ArgumentParser(description='Aggregate exon/intron mapping information from all *_ExonIntron.txt files in the current directory. \
                                               python inf_ExonIntron_v2.py \
-                                              -o output')
+                                              -o output_prefix')
 
 parser.add_argument('-o', '--output', type=str, required=True, help='output_file_name')
 
