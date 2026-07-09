@@ -17,7 +17,7 @@ parser = argparse.ArgumentParser(description='Subsample reads to the same sequen
                                               -o output_prefix')
 
 parser.add_argument('-s', '--sam', type=str, nargs='+', help='a sam file(s) with suffix".sam" or a list of sam')
-parser.add_argument('-g', '--gtf', type=str, required=True, help='path to the GTF file for htseq-count')
+parser.add_argument('-g', '--gtf', type=str, required=True, help='path to the GTF file for htseq-count (e.g., GRCh38.105 for human, GRCm38.102 for mouse)')
 parser.add_argument('-mt', '--mtgene', type=str, required=True, help='path to a list of mitochondrial gene IDs')
 parser.add_argument('-rp', '--rpgene', type=str, required=True, help='path to a list of ribosomal protein gene IDs')
 parser.add_argument('-d', '--depth', type=str, required=True, help='subsampling depth (e.g. 1M) or "raw" to skip downsampling')
