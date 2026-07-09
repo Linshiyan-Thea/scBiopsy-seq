@@ -7,8 +7,10 @@
 #           a pairing column for paired designs).
 # Output: DE results table and volcano plot.
 # ==============================================================================
-
-rm(list = ls())
+# Environment: R 4.4.3
+# Packages: DESeq2 1.46.0, ggplot2 4.0.2, ggrepel 0.9.6,
+#           openxlsx 4.2.8, dplyr 1.1.4
+# ==============================================================================
 
 # ======================== Parameters =========================================
 padj_cutoff   <- 0.05   # Adjusted p-value threshold
@@ -67,6 +69,17 @@ if (length(group_levels) != 2) {
 group_ref <- group_levels[1]   # Reference group (denominator)
 group_alt <- group_levels[2]   # Comparison group (numerator)
 cat("Groups detected: ", group_ref, " (reference) vs ", group_alt, "\n")
+
+# ======================== Validate paired design =============================
+if (paired) {
+  if (!pair_id_col %in% colnames(colData)) {
+    stop("Paired analysis requested (paired = TRUE), but column '", pair_id_col,
+         "' not found in metadata. Available columns: ",
+         paste(colnames(colData), collapse = ", "),
+         "\nSet paired = FALSE or add the pairing column to your metadata file.")
+  }
+  cat("Paired design: using '", pair_id_col, "' as pairing variable.\n")
+}
 
 # ======================== Build DESeq2 object =================================
 design_formula <- if (paired) {
