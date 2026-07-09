@@ -12,10 +12,10 @@ import re
 from collections import Counter
 import argparse
 
-parser = argparse.ArgumentParser(description='整合各样本的STAR比对信息（默认为./log_final_out目录下所有*Log.final.out文件）: \
+parser = argparse.ArgumentParser(description='Aggregate STAR alignment statistics from all *Log.final.out files in the specified directory. \
                                               python inf_star_map_ver0.1.py \
-                                              -i input dir \
-                                              -o output')
+                                              -i path/to/log_final_out \
+                                              -o output_prefix')
 
 parser.add_argument('-i', '--input_dir', type=str, default='./log_final_out', help='url to /log_final_out/')
 parser.add_argument('-o', '--output_prefix', type=str, required=True, help='output_file_prefix')
