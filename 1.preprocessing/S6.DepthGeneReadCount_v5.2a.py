@@ -7,19 +7,22 @@ import numpy as np
 import openpyxl
 import argparse
 
-parser = argparse.ArgumentParser(description='取同一测序深度，计算测到的基因数 \
-                                              python DepthGeneReadCount_v3.py \
+parser = argparse.ArgumentParser(description='Subsample reads to the same sequencing depth and calculate gene counts. \
+                                              python DepthGeneReadCount_v5.2a.py \
                                               -s list_Aligned.out.sam \
-                                              -g url_to_gtf \
-                                              -d deptha \
-                                              -o output')
+                                              -g path/to/annotation.gtf \
+                                              -mt path/to/mt_gene.txt \
+                                              -rp path/to/rp_gene_id.txt \
+                                              -d depth_or_raw \
+                                              -o output_prefix')
 
 parser.add_argument('-s', '--sam', type=str, nargs='+', help='a sam file(s) with suffix".sam" or a list of sam')
-parser.add_argument('-g', '--gtf', type=str, default='/home/disk/linl/reference/GRCh38/Homo_sapiens.GRCh38.105.gtf', help='gtf for htseq-count')
-parser.add_argument('-mt', '--mtgene', type=str, default='/home/disk/linl/reference/GRCh38/mt_gene.txt', help='a list of mt gene id/name')
-parser.add_argument('-rp', '--rpgene', type=str, default='/home/disk/linl/dmf_live_seq/live_seq/ncbi_rp_id.txt', help='a list of rp gene id/name')
-parser.add_argument('-d', '--depth', type=str, required=True, help='depth or "raw"')
-parser.add_argument('-o', '--output', type=str, required=True, help='output_depth_GeneReadCount.xlsx')
+parser.add_argument('-g', '--gtf', type=str, required=True, help='path to the GTF file for htseq-count')
+parser.add_argument('-mt', '--mtgene', type=str, required=True, help='path to a list of mitochondrial gene IDs')
+parser.add_argument('-rp', '--rpgene', type=str, required=True, help='path to a list of ribosomal protein gene IDs')
+parser.add_argument('-d', '--depth', type=str, required=True, help='subsampling depth (e.g. 1M) or "raw" to skip downsampling')
+parser.add_argument('-o', '--output', type=str, required=True, help='output prefix for DepthGeneReadCount.xlsx')
+parser.add_argument('--seed', type=int, default=42, help='random seed for downsampling (default: 42)')
 
 args = parser.parse_args()
 
@@ -36,6 +39,7 @@ def DepthGene(sam, fq, d, depth_str):
             idid = re.match(pattern, cont_fq[nn])
             list_id.append(idid.group(1).split('/')[0])
         nn = nn+1
+    np.random.seed(args.seed)
     list_ID = np.random.choice(list_id, d, replace = False)
     dict_ID = {}
     for i in list_id:
@@ -235,12 +239,12 @@ ws['B2'] = str(total_gene_num1)
 #    ws['B2'] = str(total_gene_num1)
 #    ws['C2'] = 'Total gene num(nonempty)'
 #    ws['D2'] = str(total_gene_num2)
-ws['C3']='基因总表达量'
-ws['D3']='基因数'
-ws['E3']='线粒体表达量'
-ws['F3']='线粒体表达量占比'
-ws['G3']='核糖蛋白表达量'
-ws['H3']='核糖蛋白表达量占比'
+ws['C3']='Total expression'
+ws['D3']='Number of genes'
+ws['E3']='Mitochondrial expression'
+ws['F3']='Mitochondrial proportion'
+ws['G3']='Ribosomal protein expression'
+ws['H3']='Ribosomal protein proportion'
 ws['A4'] = 'File'
 ws['B4'] = 'Sample'
 ws['C4'] = 'nCount(union)'
