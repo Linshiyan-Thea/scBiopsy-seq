@@ -1,10 +1,7 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Aug 14 13:56:04 2020
-
-@author: cyclopenta
-"""
-
+# ==============================================================================
+# Environment: Python 3.12
+# No external package dependencies (standard library only: sys, os, re, datetime, argparse)
+# ==============================================================================
 
 import sys
 import os
