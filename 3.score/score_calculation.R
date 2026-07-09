@@ -68,7 +68,6 @@ print(result_geo)
 # ==============================================================================
 # Save results
 # ==============================================================================
-output_dir <- "path/to/your/output"
 dir.create(output_dir, showWarnings = FALSE, recursive = TRUE)
 
 write.csv(result_geo,
