@@ -172,7 +172,5 @@ Computes Pearson and Spearman correlations of mean gene expression between two g
 
 
 ## License
-
-MIT License
-# scBiopsy-seq
-scBiopsy-seq: a temporal scRNA-seq assay combining electroosmosis-electrophoresis extraction &amp; digital microfluidics. Detects 10-15K genes/cell with >90% success, enables sequential cytoplasmic extraction to link phenotype with transcriptional dynamics in development, viral infection &amp; transcriptional suppression.
+Copyright (c) 2025 All authors of scBiopsy-seq.
+Released under the MIT License.
