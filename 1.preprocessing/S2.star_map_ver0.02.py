@@ -10,10 +10,23 @@ import sys
 import os
 import re
 import datetime
+import argparse
+
+parser = argparse.ArgumentParser(description='STAR alignment for paired-end RNA-seq reads. \
+                                              python S2.star_map_ver0.02.py \
+                                              --star_index path/to/STAR/genome/index \
+                                              --gtf path/to/annotation.gtf')
+
+parser.add_argument('--star_index', type=str, required=True, help='path to the STAR genome index directory')
+parser.add_argument('--gtf', type=str, required=True, help='path to the GTF annotation file')
+parser.add_argument('-t', '--threads', type=int, default=10, help='number of threads (default: 10)')
+
+args = parser.parse_args()
 
 #define parameters
-source_star_path = '/home/disk/linl/reference/GRCh38/STAR'
-gtf_file_path = '/home/disk/linl/reference/GRCh38/Homo_sapiens.GRCh38.105.gtf'
+source_star_path = args.star_index
+gtf_file_path = args.gtf
+n_threads = args.threads
 now_time = datetime.datetime.now()
 time_str = now_time.strftime('%Y-%m-%d-%H_%M_%S')
 star_out_path = 'star_out_'+time_str
@@ -33,10 +46,10 @@ for f1 in raw_file:
     out_prefix = re.sub('_1_repair_1.fq','',f1)
     print('now processing: %s and %s'%(r1,r2))
     os.system('''
-STAR --runThreadN 10 --genomeDir {starpath} --outFileNamePrefix {prefix} --sjdbGTFfile {gtf} --outSAMunmapped Within --readFilesIn {read1}.fq {read2}.fq;
+STAR --runThreadN {threads} --genomeDir {starpath} --outFileNamePrefix {prefix} --sjdbGTFfile {gtf} --outSAMunmapped Within --readFilesIn {read1}.fq {read2}.fq;
 mv {prefix}Log.final.out ./{path1}/{path2};
 mv {prefix}Aligned.out.sam {prefix}Log.out {prefix}Log.progress.out {prefix}SJ.out.tab {prefix}_STARgenome ./{path1};
-'''.format(starpath=source_star_path, read1=r1, read2=r2, prefix=out_prefix, gtf=gtf_file_path, path1=star_out_path, path2=log_out_path)) 
+'''.format(threads=n_threads, starpath=source_star_path, read1=r1, read2=r2, prefix=out_prefix, gtf=gtf_file_path, path1=star_out_path, path2=log_out_path)) 
     
 os.system('''rm clean_file_star_temp.txt''')
 
