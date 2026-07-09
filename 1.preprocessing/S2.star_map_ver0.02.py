@@ -15,10 +15,11 @@ import argparse
 parser = argparse.ArgumentParser(description='STAR alignment for paired-end RNA-seq reads. \
                                               python S2.star_map_ver0.02.py \
                                               --star_index path/to/STAR/genome/index \
-                                              --gtf path/to/annotation.gtf')
+                                              --gtf path/to/annotation.gtf \
+                                              Reference: human GRCh38.105 / mouse GRCm38.102')
 
-parser.add_argument('--star_index', type=str, required=True, help='path to the STAR genome index directory')
-parser.add_argument('--gtf', type=str, required=True, help='path to the GTF annotation file')
+parser.add_argument('--star_index', type=str, required=True, help='path to the STAR genome index directory (e.g., GRCh38.105 for human, GRCm38.102 for mouse)')
+parser.add_argument('--gtf', type=str, required=True, help='path to the GTF annotation file (e.g., Homo_sapiens.GRCh38.105.gtf for human, Mus_musculus.GRCm38.102.gtf for mouse)')
 parser.add_argument('-t', '--threads', type=int, default=10, help='number of threads (default: 10)')
 
 args = parser.parse_args()
