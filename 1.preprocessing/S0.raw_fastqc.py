@@ -1,6 +1,7 @@
 # ==============================================================================
 # Environment: Python 3.12
 # No external package dependencies (standard library only: os, re)
+# External tools: FastQC v0.12.1
 # ==============================================================================
 
 import os
