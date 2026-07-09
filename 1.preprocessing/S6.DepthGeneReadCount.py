@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-#coding=utf-8
-
 # ==============================================================================
 # Environment: Python 3.12
 # Packages: numpy 2.5.0, openpyxl 3.1.5
