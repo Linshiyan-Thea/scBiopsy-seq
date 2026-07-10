@@ -90,6 +90,8 @@ BiocManager::install(c(
 ))
 ```
 
+Package versions used in the published study are listed in each script's header comment.
+
 
 ## Environment
 
@@ -121,27 +123,7 @@ External command-line tools:
 R 4.4.3
 ```
 
-Key packages:
-
-| Package | Version | Used in |
-|---------|---------|---------|
-| DESeq2 | 1.40.1 | 5.DE_analysis |
-| SingleCellExperiment | 1.28.1 | 2.clustering, 4.trajectory |
-| scater | 1.34.1 | 2.clustering, 4.trajectory |
-| slingshot | 2.14.0 | 4.trajectory |
-| SC3 | 1.18.0 | 2.clustering |
-| clusterProfiler | 3.18.1 | 5.DE_analysis |
-| umap | 0.2.10.0 | 2.clustering |
-| ggplot2 | 4.0.2 | 2–6 |
-| ggrepel | 0.9.6 | 2, 4, 5 |
-| openxlsx | 4.2.8 | 2, 3, 4, 5 |
-| readxl | 1.4.5 | 3, 6 |
-| cowplot | 1.2.0 | 2.clustering |
-| tidyverse | 2.0.0 | 3.score |
-| viridis | 0.6.5 | 4.trajectory |
-| patchwork | 1.3.2 | 4.trajectory |
-| dplyr | 1.1.4 | 2, 4, 5 |
-| stringr | 1.5.2 | 4.trajectory |
+R package versions used in the published study are annotated in the header of each script.
 
 
 ## Usage
