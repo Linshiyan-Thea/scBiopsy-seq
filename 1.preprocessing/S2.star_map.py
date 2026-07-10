@@ -1,7 +1,7 @@
 # ==============================================================================
 # Environment: Python 3.12
 # No external package dependencies (standard library only: sys, os, re, datetime, argparse)
-# External tools: STAR 2.7.11b
+# External tools: STAR 2.7.3a
 # ==============================================================================
 
 import sys
