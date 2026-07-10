@@ -1,7 +1,7 @@
 # ==============================================================================
 # Environment: Python 3.12
 # No external package dependencies (standard library only: os, re, argparse)
-# External tools: samtools 1.19.2
+# External tools: samtools 1.3.1
 # ==============================================================================
 
 import os
