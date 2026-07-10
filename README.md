@@ -95,24 +95,8 @@ Package versions used in the published study are listed in each script's header 
 
 ## Environment
 
-The versions listed below match those used in the published study.
-
-### Python (preprocessing)
-
-```
-Python 3.12
-pandas 3.0.3
-numpy 2.5.0
-openpyxl 3.1.5
-```
-
-### R (downstream analysis)
-
-```
-R 4.4.3
-```
-
-R package versions used in the published study are annotated in the header of each script.
+- **Python** 3.12 (package versions pinned in Installation)
+- **R** 4.4.3 (package versions annotated in each script's header)
 
 
 ## Usage
@@ -266,4 +250,5 @@ Edit `input_file`, `group_file`, and `output_dir` in the "User settings" block.
 
 ## License
 
-Copyright (c) All authors of scBiopsy-seq. Released under the MIT License.
+Copyright (c) All authors of scBiopsy-seq. 
+Released under the MIT License.
