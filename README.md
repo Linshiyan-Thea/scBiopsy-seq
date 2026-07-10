@@ -68,14 +68,6 @@ The preprocessing pipeline also requires the following external command-line too
 # Option A: install via conda
 conda install -c bioconda fastqc=0.11.7 cutadapt=3.4 bbmap=38.90 star=2.7.3a samtools=1.3.1 htseq=0.12.4
 
-# Option B: install manually from source
-# FastQC   — https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
-# cutadapt — https://cutadapt.readthedocs.io/
-# BBMap    — https://sourceforge.net/projects/bbmap/
-# STAR     — https://github.com/alexdobin/STAR
-# samtools — https://www.htslib.org/
-# HTSeq    — https://htseq.readthedocs.io/
-```
 
 > **Note:** The preprocessing scripts (S0–S6) invoke external tools via `os.system` and shell commands. These scripts must be run on a **Linux/Unix** system with the above tools available in `$PATH`.
 
