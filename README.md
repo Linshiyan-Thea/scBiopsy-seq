@@ -1,6 +1,6 @@
 # scBiopsy-seq
 
-scBiopsy-seq: a temporal scRNA-seq assay combining electroosmosis-electrophoresis extraction & digital microfluidics. Detects 10–15K genes/cell with ~96% success, enables sequential cytoplasmic extraction to link phenotype with transcriptional dynamics in development, viral infection & transcriptional suppression.
+scBiopsy-seq: a temporal scRNA-seq assay combining electroosmosis-electrophoresis extraction & digital microfluidics. Detects 10–15K genes/cell with >90% success, enables sequential cytoplasmic extraction to link phenotype with transcriptional dynamics in development, viral infection & transcriptional suppression.
 
 ## Overview
 
@@ -22,12 +22,12 @@ scBiopsy-seq/
 ├── 1.preprocessing/
 │   ├── S0.raw_fastqc.py              # FastQC quality control of raw reads
 │   ├── S1.adapters_RNA.fasta         # Adapter sequences for trimming
-│   ├── S1.trim_fastqc.py     # Adapter trimming and post-trim QC
-│   ├── S2.star_map.py        # STAR alignment
-│   ├── S3.inf_star_map.py     # Aggregate STAR mapping statistics
-│   ├── S4.ExonIntron_RNA.py     # Exon/intron mapping rate calculation
-│   ├── S5.inf_ExonIntron.py       # Aggregate exon/intron statistics
-│   └── S6.DepthGeneReadCount.py # Read-depth subsampling and gene counting
+│   ├── S1.trim_fastqc_ver0.02.py     # Adapter trimming and post-trim QC
+│   ├── S2.star_map_ver0.02.py        # STAR alignment
+│   ├── S3.inf_star_map_ver0.1.py     # Aggregate STAR mapping statistics
+│   ├── S4.ExonIntron_RNA_v2.2.py     # Exon/intron mapping rate calculation
+│   ├── S5.inf_ExonIntron_v2.py       # Aggregate exon/intron statistics
+│   └── S6.DepthGeneReadCount_v5.2a.py # Read-depth subsampling and gene counting
 ├── 2.clustering/
 │   ├── cluster based on exon.R                  # UMAP clustering on exon FPKM
 │   ├── clustering based on expression change.R  # UMAP + k-means on log2 FC
@@ -43,7 +43,66 @@ scBiopsy-seq/
 ```
 
 
+## Installation
+
+Clone the repository and enter the project directory:
+
+```bash
+git clone https://github.com/YangLab/scBiopsy-seq.git
+cd scBiopsy-seq
+```
+
+### Python environment (preprocessing)
+
+Create a conda environment for the preprocessing scripts:
+
+```bash
+conda create -n scbiopsy python=3.12 -y
+conda activate scbiopsy
+pip install pandas numpy openpyxl
+```
+
+The preprocessing pipeline also requires the following external command-line tools (install separately or via conda):
+
+```bash
+# Option A: install via conda
+conda install -c bioconda fastqc=0.11.7 cutadapt=3.4 bbmap=38.90 star=2.7.3a samtools=1.3.1 htseq=0.12.4
+
+# Option B: install manually from source
+# FastQC   — https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
+# cutadapt — https://cutadapt.readthedocs.io/
+# BBMap    — https://sourceforge.net/projects/bbmap/
+# STAR     — https://github.com/alexdobin/STAR
+# samtools — https://www.htslib.org/
+# HTSeq    — https://htseq.readthedocs.io/
+```
+
+> **Note:** The preprocessing scripts (S0–S6) invoke external tools via `os.system` and shell commands. These scripts must be run on a **Linux/Unix** system with the above tools available in `$PATH`.
+
+### R environment (downstream analysis)
+
+Install the R packages used for clustering, scoring, trajectory, DE, and correlation analysis:
+
+```r
+# CRAN packages
+install.packages(c(
+  "ggplot2", "ggrepel", "cowplot", "viridis", "patchwork",
+  "dplyr", "stringr", "tidyr", "readxl", "openxlsx",
+  "tidyverse", "umap"
+))
+
+# Bioconductor packages
+if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
+BiocManager::install(c(
+  "DESeq2", "SingleCellExperiment", "scater", "slingshot",
+  "SC3", "clusterProfiler"
+))
+```
+
+
 ## Environment
+
+The versions listed below match those used in the published study.
 
 ### Python (preprocessing)
 
@@ -58,10 +117,12 @@ External command-line tools:
 
 | Tool | Version |
 |------|---------|
-| FastQC | v0.12.1 |
-| cutadapt | 5.0 |
-| STAR | 2.7.11b |
-| samtools | 1.19.2 |
+| FastQC | v0.11.7 |
+| cutadapt | v3.4 |
+| BBMap | v38.90 |
+| STAR | v2.7.3a |
+| samtools | v1.3.1 |
+| htseq-count | v0.12.4 |
 
 ### R (downstream analysis)
 
@@ -73,10 +134,12 @@ Key packages:
 
 | Package | Version | Used in |
 |---------|---------|---------|
-| DESeq2 | 1.46.0 | 5.DE_analysis |
+| DESeq2 | 1.40.1 | 5.DE_analysis |
 | SingleCellExperiment | 1.28.1 | 2.clustering, 4.trajectory |
 | scater | 1.34.1 | 2.clustering, 4.trajectory |
 | slingshot | 2.14.0 | 4.trajectory |
+| SC3 | 1.18.0 | 2.clustering |
+| clusterProfiler | 3.18.1 | 5.DE_analysis |
 | umap | 0.2.10.0 | 2.clustering |
 | ggplot2 | 4.0.2 | 2–6 |
 | ggrepel | 0.9.6 | 2, 4, 5 |
@@ -94,42 +157,104 @@ Key packages:
 
 ### 1. Preprocessing
 
-Run scripts sequentially in the `1.preprocessing/` directory.
+> **Note:** All preprocessing scripts invoke external tools (FastQC, cutadapt, BBMap `repair.sh`, STAR, samtools, htseq-count) via `os.system` shell commands. They must be run on a **Linux/Unix** system with these tools available in `$PATH`.
+>
+> Scripts S0–S1 do not accept command-line arguments; edit the paths inside the script or place input files in the working directory as described below.
+> Scripts S2–S6 accept command-line arguments; use `--help` for full parameter details.
+
+#### S0 — Raw read quality control
+
+Place all raw `*.fq` files in the working directory. The script runs FastQC on every `.fq` file and writes results to `fastqc_result/`.
 
 ```bash
-# Quality control
 python S0.raw_fastqc.py
-
-# Trimming
-python S1.trim_fastqc_ver0.02.py
-
-# STAR alignment
-python S2.star_map_ver0.02.py --star_index path/to/STAR/genome/index --gtf path/to/annotation.gtf
-
-# Mapping statistics
-python S3.inf_star_map_ver0.1.py -i ./log_final_out -o output_prefix
-
-# Exon/intron rate
-python S4.ExonIntron_RNA_v2.2.py -e path/to/exon.bed -g path/to/gene.bed
-
-# Aggregate exon/intron info
-python S5.inf_ExonIntron_v2.py -o output_prefix
-
-# Subsampling and gene counting
-python S6.DepthGeneReadCount_v5.2a.py -s list.sam -g path/to/annotation.gtf -mt path/to/mt_gene.txt -rp path/to/rp_gene_id.txt -d 1M -o output_prefix
 ```
+
+#### S1 — Adapter trimming and post-trim QC
+
+Place paired-end FASTQ files (`*1.fq`, `*2.fq`) and the adapter file `S1.adapters_RNA.fasta` in the working directory. The script runs cutadapt (adapter removal + poly-tail trimming), BBMap `repair.sh` (paired-end repair), and FastQC on trimmed reads.
+
+```bash
+python S1.trim_fastqc_ver0.02.py
+```
+
+Output: trimmed `*_repair_1.fq` / `*_repair_2.fq` files (used by S2).
+
+#### S2 — STAR alignment
+
+Align trimmed paired-end reads with STAR. Requires the STAR genome index and GTF annotation.
+
+```bash
+python S2.star_map_ver0.02.py --star_index path/to/STAR/genome/index --gtf path/to/annotation.gtf
+```
+
+Optional: `-t/--threads` (default: 10). Input: `*_1_repair_1.fq` / `*_2_repair_2.fq` from S1. Output: `Aligned.out.sam` and `Log.final.out` in `star_out_*/`.
+
+#### S3 — Aggregate STAR mapping statistics
+
+Collect all `*Log.final.out` files from the directory specified by `-i` and summarize mapping rates.
+
+```bash
+python S3.inf_star_map_ver0.1.py -i ./log_final_out -o output_prefix
+```
+
+`-i` defaults to `./log_final_out` if omitted.
+
+#### S4 — Exon/intron mapping rate
+
+Calculate exon and intron mapping rates for all `Aligned.out.sam` files in the working directory. Requires exon and gene BED files derived from the reference annotation.
+
+```bash
+python S4.ExonIntron_RNA_v2.2.py -e path/to/exon.bed -g path/to/gene.bed
+```
+
+Output: `*_ExonIntron.txt` per sample (used by S5).
+
+#### S5 — Aggregate exon/intron statistics
+
+Collect all `*_ExonIntron.txt` files in the working directory and write a summary Excel table.
+
+```bash
+python S5.inf_ExonIntron_v2.py -o output_prefix
+```
+
+Output: `output_prefix_ExonIntron_MAP.xlsx`.
+
+#### S6 — Read-depth subsampling and gene counting
+
+Subsample all samples to the same sequencing depth and count genes with htseq-count.
+
+```bash
+python S6.DepthGeneReadCount_v5.2a.py \
+    -s sample1_Aligned.out.sam sample2_Aligned.out.sam \
+    -g path/to/annotation.gtf \
+    -mt path/to/mt_gene.txt \
+    -rp path/to/rp_gene_id.txt \
+    -d 1M \
+    -o output_prefix
+```
+
+| Argument | Required | Description |
+|----------|----------|-------------|
+| `-s` | yes | One or more `.sam` files, or a text file listing sam paths |
+| `-g` | yes | GTF annotation file |
+| `-mt` | yes | Text file of mitochondrial gene IDs |
+| `-rp` | yes | Text file of ribosomal protein gene IDs |
+| `-d` | yes | Subsampling depth (e.g. `1M`) or `raw` to skip |
+| `-o` | yes | Output prefix for `DepthGeneReadCount.xlsx` |
+| `--seed` | no | Random seed for downsampling (default: 42) |
 
 Reference genome: **GRCh38.105** (human) or **GRCm38.102** (mouse).
 
 ### 2. Clustering
 
-Edit the file paths at the top of each R script before running:
+Edit the file paths at the top of each R script before running. All scripts require the user to set `input_dir`, `output_dir`, and other parameters in the "User settings" block at the top.
 
 ```r
-# UMAP clustering based on exon expression
+# UMAP clustering based on exon FPKM
 source("2.clustering/cluster based on exon.R")
 
-# Clustering based on within-cell expression changes (log2 FC)
+# UMAP + k-means clustering based on within-cell expression changes (log2 FC)
 source("2.clustering/clustering based on expression change.R")
 
 # Cross-platform comparison (scBiopsy-seq vs scRNA-seq)
@@ -138,39 +263,45 @@ source("2.clustering/clustering based on scBiopsy and scRNA-seq.R")
 
 ### 3. Gene set score
 
-Provide a gene expression matrix containing only the genes of interest:
+Compute a geometric-mean-based score for a custom gene set. Provide a gene expression matrix containing only the genes of interest and a sample group file.
 
 ```r
 source("3.score/score_calculation.R")
 ```
 
-Set `gene_set_name` in the script to label the output file.
+Set `gene_set_name` in the script to label the output file. Set `input_file`, `group_file`, and `output_dir` in the "User settings" block.
 
 ### 4. Trajectory analysis
+
+Perform Slingshot pseudotime trajectory inference with gene–pseudotime correlation analysis.
 
 ```r
 source("4.trajectory/Trajectory.R")
 ```
 
-Outputs include pseudotime tables, gene–pseudotime correlations.
+Set `start_group` to define the trajectory origin. Edit `input_file`, `output_dir`, and `n_neighbors` in the "User settings" block. Outputs include pseudotime tables, gene–pseudotime correlations, and top-10 gene UMAP plots.
 
 ### 5. Differential expression
+
+Run DESeq2-based differential expression analysis between two groups.
 
 ```r
 source("5.DE_analysis/DE_analysis.R")
 ```
 
-Set `paired = TRUE/FALSE` depending on experimental design. For paired analysis, ensure the metadata file contains the pairing column (default: `pair`).
+Set `paired = TRUE/FALSE` depending on experimental design. For paired analysis, ensure the metadata file contains the pairing column (default: `pair`). Edit `count_file`, `meta_file`, and `output_dir` in the "User settings" block.
 
 ### 6. Correlation
+
+Compute Pearson and Spearman correlations of mean gene expression between two groups.
 
 ```r
 source("6.correlation/correlation.R")
 ```
 
-Computes Pearson and Spearman correlations of mean gene expression between two groups.
+Edit `input_file`, `group_file`, and `output_dir` in the "User settings" block.
 
 
 ## License
-Copyright (c) 2025 All authors of scBiopsy-seq.
-Released under the MIT License.
+
+Copyright (c) All authors of scBiopsy-seq. Released under the MIT License.
