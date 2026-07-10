@@ -106,17 +106,6 @@ numpy 2.5.0
 openpyxl 3.1.5
 ```
 
-External command-line tools:
-
-| Tool | Version |
-|------|---------|
-| FastQC | v0.11.7 |
-| cutadapt | v3.4 |
-| BBMap | v38.90 |
-| STAR | v2.7.3a |
-| samtools | v1.3.1 |
-| htseq-count | v0.12.4 |
-
 ### R (downstream analysis)
 
 ```
