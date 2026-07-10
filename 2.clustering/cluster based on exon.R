@@ -7,7 +7,7 @@
 # Output: UMAP coordinates (xlsx) and UMAP plots (PDF).
 # ==============================================================================
 # Environment: R 4.4.3
-# Packages: openxlsx 4.2.8, ggplot2 4.0.2, ggrepel 0.9.6, umap 0.2.10.0
+# Packages: openpyxl 3.1.5, ggplot2 4.0.2, ggrepel 0.9.6, umap 0.2.10.0
 # ==============================================================================
 
 library(openxlsx)
