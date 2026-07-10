@@ -8,7 +8,7 @@
 # Output: DE results table and volcano plot.
 # ==============================================================================
 # Environment: R 4.4.3
-# Packages: DESeq2 1.46.0, ggplot2 4.0.2, ggrepel 0.9.6,
+# Packages: DESeq2 1.40.1, ggplot2 4.0.2, ggrepel 0.9.6,
 #           openxlsx 4.2.8, dplyr 1.1.4
 # ==============================================================================
 
