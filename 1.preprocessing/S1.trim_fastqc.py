@@ -1,7 +1,7 @@
 # ==============================================================================
 # Environment: Python 3.12
 # Packages: pandas 3.0.3
-# External tools: FastQC v0.12.1, cutadapt 5.0
+# External tools: FastQC v0.11.7, cutadapt v3.4, BBMap v38.90
 # ==============================================================================
 
 
