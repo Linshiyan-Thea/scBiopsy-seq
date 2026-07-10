@@ -22,12 +22,12 @@ scBiopsy-seq/
 ├── 1.preprocessing/
 │   ├── S0.raw_fastqc.py              # FastQC quality control of raw reads
 │   ├── S1.adapters_RNA.fasta         # Adapter sequences for trimming
-│   ├── S1.trim_fastqc_ver0.02.py     # Adapter trimming and post-trim QC
-│   ├── S2.star_map_ver0.02.py        # STAR alignment
-│   ├── S3.inf_star_map_ver0.1.py     # Aggregate STAR mapping statistics
-│   ├── S4.ExonIntron_RNA_v2.2.py     # Exon/intron mapping rate calculation
-│   ├── S5.inf_ExonIntron_v2.py       # Aggregate exon/intron statistics
-│   └── S6.DepthGeneReadCount_v5.2a.py # Read-depth subsampling and gene counting
+│   ├── S1.trim_fastqc.py     # Adapter trimming and post-trim QC
+│   ├── S2.star_map.py        # STAR alignment
+│   ├── S3.inf_star_map.py     # Aggregate STAR mapping statistics
+│   ├── S4.ExonIntron_RNA.py     # Exon/intron mapping rate calculation
+│   ├── S5.inf_ExonIntron.py       # Aggregate exon/intron statistics
+│   └── S6.DepthGeneReadCount.py # Read-depth subsampling and gene counting
 ├── 2.clustering/
 │   ├── cluster based on exon.R                  # UMAP clustering on exon FPKM
 │   ├── clustering based on expression change.R  # UMAP + k-means on log2 FC
