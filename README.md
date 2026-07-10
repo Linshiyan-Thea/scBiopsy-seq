@@ -1,6 +1,6 @@
 # scBiopsy-seq
 
-scBiopsy-seq: a temporal scRNA-seq assay combining electroosmosis-electrophoresis extraction & digital microfluidics. Detecting 10-15K genes per extraction of cytoplasm with ~96% successful rate, enables sequential cytoplasmic extraction to link phenotype with transcriptional dynamics in development, viral infection & transcriptional suppression.
+scBiopsy-seq: a temporal scRNA-seq assay combining electroosmosis-electrophoresis extraction & digital microfluidics. Detects 10–15K genes/cell with >90% success, enables sequential cytoplasmic extraction to link phenotype with transcriptional dynamics in development, viral infection & transcriptional suppression.
 
 ## Overview
 
@@ -22,12 +22,12 @@ scBiopsy-seq/
 ├── 1.preprocessing/
 │   ├── S0.raw_fastqc.py              # FastQC quality control of raw reads
 │   ├── S1.adapters_RNA.fasta         # Adapter sequences for trimming
-│   ├── S1.trim_fastqc.py     # Adapter trimming and post-trim QC
-│   ├── S2.star_map.py        # STAR alignment
-│   ├── S3.inf_star_map.py     # Aggregate STAR mapping statistics
-│   ├── S4.ExonIntron_RNA.py     # Exon/intron mapping rate calculation
-│   ├── S5.inf_ExonIntron.py       # Aggregate exon/intron statistics
-│   └── S6.DepthGeneReadCount.py # Read-depth subsampling and gene counting
+│   ├── S1.trim_fastqc.py             # Adapter trimming and post-trim QC
+│   ├── S2.star_map.py                # STAR alignment
+│   ├── S3.inf_star_map.py            # Aggregate STAR mapping statistics
+│   ├── S4.ExonIntron_RNA.py          # Exon/intron mapping rate calculation
+│   ├── S5.inf_ExonIntron.py          # Aggregate exon/intron statistics
+│   └── S6.DepthGeneReadCount.py      # Read-depth subsampling and gene counting
 ├── 2.clustering/
 │   ├── cluster based on exon.R                  # UMAP clustering on exon FPKM
 │   ├── clustering based on expression change.R  # UMAP + k-means on log2 FC
@@ -48,7 +48,7 @@ scBiopsy-seq/
 Clone the repository and enter the project directory:
 
 ```bash
-git clone https://github.com/YangLab/scBiopsy-seq.git
+git clone https://github.com/Linshiyan-Thea/scBiopsy-seq.git
 cd scBiopsy-seq
 ```
 
@@ -68,6 +68,14 @@ The preprocessing pipeline also requires the following external command-line too
 # Option A: install via conda
 conda install -c bioconda fastqc=0.11.7 cutadapt=3.4 bbmap=38.90 star=2.7.3a samtools=1.3.1 htseq=0.12.4
 
+# Option B: install manually from source
+# FastQC   — https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
+# cutadapt — https://cutadapt.readthedocs.io/
+# BBMap    — https://sourceforge.net/projects/bbmap/
+# STAR     — https://github.com/alexdobin/STAR
+# samtools — https://www.htslib.org/
+# HTSeq    — https://htseq.readthedocs.io/
+```
 
 > **Note:** The preprocessing scripts (S0–S6) invoke external tools via `os.system` and shell commands. These scripts must be run on a **Linux/Unix** system with the above tools available in `$PATH`.
 
@@ -167,7 +175,7 @@ python S0.raw_fastqc.py
 Place paired-end FASTQ files (`*1.fq`, `*2.fq`) and the adapter file `S1.adapters_RNA.fasta` in the working directory. The script runs cutadapt (adapter removal + poly-tail trimming), BBMap `repair.sh` (paired-end repair), and FastQC on trimmed reads.
 
 ```bash
-python S1.trim_fastqc_ver0.02.py
+python S1.trim_fastqc.py
 ```
 
 Output: trimmed `*_repair_1.fq` / `*_repair_2.fq` files (used by S2).
@@ -177,7 +185,7 @@ Output: trimmed `*_repair_1.fq` / `*_repair_2.fq` files (used by S2).
 Align trimmed paired-end reads with STAR. Requires the STAR genome index and GTF annotation.
 
 ```bash
-python S2.star_map_ver0.02.py --star_index path/to/STAR/genome/index --gtf path/to/annotation.gtf
+python S2.star_map.py --star_index path/to/STAR/genome/index --gtf path/to/annotation.gtf
 ```
 
 Optional: `-t/--threads` (default: 10). Input: `*_1_repair_1.fq` / `*_2_repair_2.fq` from S1. Output: `Aligned.out.sam` and `Log.final.out` in `star_out_*/`.
@@ -187,7 +195,7 @@ Optional: `-t/--threads` (default: 10). Input: `*_1_repair_1.fq` / `*_2_repair_2
 Collect all `*Log.final.out` files from the directory specified by `-i` and summarize mapping rates.
 
 ```bash
-python S3.inf_star_map_ver0.1.py -i ./log_final_out -o output_prefix
+python S3.inf_star_map.py -i ./log_final_out -o output_prefix
 ```
 
 `-i` defaults to `./log_final_out` if omitted.
@@ -197,7 +205,7 @@ python S3.inf_star_map_ver0.1.py -i ./log_final_out -o output_prefix
 Calculate exon and intron mapping rates for all `Aligned.out.sam` files in the working directory. Requires exon and gene BED files derived from the reference annotation.
 
 ```bash
-python S4.ExonIntron_RNA_v2.2.py -e path/to/exon.bed -g path/to/gene.bed
+python S4.ExonIntron_RNA.py -e path/to/exon.bed -g path/to/gene.bed
 ```
 
 Output: `*_ExonIntron.txt` per sample (used by S5).
@@ -207,7 +215,7 @@ Output: `*_ExonIntron.txt` per sample (used by S5).
 Collect all `*_ExonIntron.txt` files in the working directory and write a summary Excel table.
 
 ```bash
-python S5.inf_ExonIntron_v2.py -o output_prefix
+python S5.inf_ExonIntron.py -o output_prefix
 ```
 
 Output: `output_prefix_ExonIntron_MAP.xlsx`.
@@ -217,7 +225,7 @@ Output: `output_prefix_ExonIntron_MAP.xlsx`.
 Subsample all samples to the same sequencing depth and count genes with htseq-count.
 
 ```bash
-python S6.DepthGeneReadCount_v5.2a.py \
+python S6.DepthGeneReadCount.py \
     -s sample1_Aligned.out.sam sample2_Aligned.out.sam \
     -g path/to/annotation.gtf \
     -mt path/to/mt_gene.txt \
