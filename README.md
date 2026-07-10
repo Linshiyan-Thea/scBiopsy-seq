@@ -59,7 +59,7 @@ Create a conda environment for the preprocessing scripts:
 ```bash
 conda create -n scbiopsy python=3.12 -y
 conda activate scbiopsy
-pip install pandas numpy openpyxl
+pip install pandas==3.0.3 numpy==2.5.0 openpyxl==3.1.5
 ```
 
 The preprocessing pipeline also requires the following external command-line tools:
