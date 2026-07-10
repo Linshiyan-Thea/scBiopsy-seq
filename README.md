@@ -62,11 +62,11 @@ conda activate scbiopsy
 pip install pandas numpy openpyxl
 ```
 
-The preprocessing pipeline also requires the following external command-line tools (install separately or via conda):
+The preprocessing pipeline also requires the following external command-line tools:
 
 ```bash
 conda install -c bioconda fastqc=0.11.7 cutadapt=3.4 bbmap=38.90 star=2.7.3a samtools=1.3.1 htseq=0.12.4
-
+```
 
 > **Note:** The preprocessing scripts (S0–S6) invoke external tools via `os.system` and shell commands. These scripts must be run on a **Linux/Unix** system with the above tools available in `$PATH`.
 
