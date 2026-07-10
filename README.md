@@ -65,7 +65,6 @@ pip install pandas numpy openpyxl
 The preprocessing pipeline also requires the following external command-line tools (install separately or via conda):
 
 ```bash
-# Option A: install via conda
 conda install -c bioconda fastqc=0.11.7 cutadapt=3.4 bbmap=38.90 star=2.7.3a samtools=1.3.1 htseq=0.12.4
 
 
