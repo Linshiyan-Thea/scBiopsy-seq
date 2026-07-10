@@ -1,6 +1,6 @@
 # scBiopsy-seq
 
-scBiopsy-seq: a temporal scRNA-seq assay combining electroosmosis-electrophoresis extraction & digital microfluidics. Detects 10–15K genes/cell with >90% success, enables sequential cytoplasmic extraction to link phenotype with transcriptional dynamics in development, viral infection & transcriptional suppression.
+scBiopsy-seq: a temporal scRNA-seq assay combining electroosmosis-electrophoresis extraction & digital microfluidics. Detects 10–15K genes/cell with ~96% success, enables sequential cytoplasmic extraction to link phenotype with transcriptional dynamics in development, viral infection & transcriptional suppression.
 
 ## Overview
 
