@@ -93,19 +93,11 @@ BiocManager::install(c(
 Package versions used in the published study are listed in each script's header comment.
 
 
-## Environment
-
-- **Python** 3.12 (package versions pinned in Installation)
-- **R** 4.4.3 (package versions annotated in each script's header)
-
-
 ## Usage
 
 ### 1. Preprocessing
 
-> **Note:** All preprocessing scripts invoke external tools (FastQC, cutadapt, BBMap `repair.sh`, STAR, samtools, htseq-count) via `os.system` shell commands. They must be run on a **Linux/Unix** system with these tools available in `$PATH`.
->
-> Scripts S0–S1 do not accept command-line arguments; edit the paths inside the script or place input files in the working directory as described below.
+> Scripts S0–S1 do not accept command-line arguments; place input files in the working directory as described below.
 > Scripts S2–S6 accept command-line arguments; use `--help` for full parameter details.
 
 #### S0 — Raw read quality control
@@ -250,5 +242,4 @@ Edit `input_file`, `group_file`, and `output_dir` in the "User settings" block.
 
 ## License
 
-Copyright (c) All authors of scBiopsy-seq. 
-Released under the MIT License.
+Copyright (c) All authors of scBiopsy-seq. Released under the MIT License.
